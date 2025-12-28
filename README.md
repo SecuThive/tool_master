@@ -43,7 +43,7 @@
 ### 설치 및 빌드
 1. 저장소 클론:
    ```bash
-   git clone [https://github.com/사용자이름/tool_master.git](https://github.com/사용자이름/tool_master.git)
+   git clone https://github.com/secuthive/tool_master.git
    ```
 
 2. 패키지 설치:
