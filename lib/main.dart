@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
-// [화면 파일 import]
+// [기존 화면 파일 import]
 import 'screens/image/image_editor_screen.dart'; 
 import 'screens/pdf/pdf_tool_screen.dart'; 
 import 'screens/document/document_viewer_screen.dart';
 import 'screens/settings/settings_screen.dart'; 
 import 'screens/image/image_info_screen.dart';
 
+// [실험실 신규 화면 import]
+// upscale_screen.dart 파일을 해당 경로에 만드셨다고 가정합니다.
+import 'screens/labs/upscale_screen.dart'; 
+
 // 테마 리모컨
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 
 void main() {
-  // 초기화 보장
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -36,7 +39,6 @@ class ToolMasterApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           themeMode: currentMode, 
 
-          // ☀️ 라이트 모드
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
@@ -51,10 +53,8 @@ class ToolMasterApp extends StatelessWidget {
               titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
               systemOverlayStyle: SystemUiOverlayStyle.dark,
             ),
-            iconTheme: const IconThemeData(color: Colors.black87),
           ),
 
-          // 🌙 다크 모드
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
@@ -69,10 +69,8 @@ class ToolMasterApp extends StatelessWidget {
               titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
               systemOverlayStyle: SystemUiOverlayStyle.light,
             ),
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
 
-          // [핵심] 다시 SplashScreen을 시작점으로 설정하여 디자인을 보여줍니다.
           home: const SplashScreen(), 
         );
       },
@@ -80,7 +78,7 @@ class ToolMasterApp extends StatelessWidget {
   }
 }
 
-// 1️⃣ 스플래시 스크린 (디자인 업그레이드 Ver.)
+// 1️⃣ 스플래시 스크린
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -96,7 +94,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     
-    // 페이드인 애니메이션 효과 추가 (부드럽게 나타나기)
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -104,7 +101,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _controller.forward();
 
-    // 2.5초 뒤에 메인 화면으로 이동
     Timer(const Duration(milliseconds: 2500), () {
       Navigator.pushReplacement(
         context,
@@ -121,18 +117,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    // 테마 감지
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
-        child: FadeTransition( // 전체적으로 부드럽게 등장
+        child: FadeTransition(
           opacity: _opacityAnimation,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 1. 로고 아이콘
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -140,26 +134,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
                 ),
                 child: Image.asset(
-                  "assets/icon/icon.png", // 아까 만든 아이콘 파일 사용
+                  "assets/icon/icon.png",
                   width: 100,
                   height: 100,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.handyman, size: 80, color: Colors.blueAccent),
                 ),
               ),
               const SizedBox(height: 30),
-              
-              // 2. 앱 이름 (TOOL MASTER)
               Text(
                 "TOOL MASTER",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   color: isDark ? Colors.white : Colors.black87,
-                  letterSpacing: 4.0, // 자간을 넓혀서 고급스럽게
+                  letterSpacing: 4.0,
                 ),
               ),
               const SizedBox(height: 10),
-              
-              // 3. 슬로건 (Premium Creative Studio)
               Text(
                 "Premium Creative Studio",
                 style: TextStyle(
@@ -169,10 +160,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   fontStyle: FontStyle.italic,
                 ),
               ),
-              
               const SizedBox(height: 60),
-              
-              // 4. 로딩 인디케이터
               SizedBox(
                 width: 24,
                 height: 24,
@@ -195,7 +183,6 @@ class MainCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ... (이 아래는 기존 코드와 동일) ...
     return Scaffold(
       appBar: AppBar(
         title: const Padding(
@@ -217,6 +204,7 @@ class MainCategoryScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // --- 이미지 도구 ---
           _buildCategoryTile(
             context,
             title: "이미지 도구 (Image Tools)",
@@ -228,10 +216,7 @@ class MainCategoryScreen extends StatelessWidget {
                 title: "이미지 편집기 실행",
                 subtitle: "자르기, 필터, 회전 등",
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ImageEditorScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImageEditorScreen()));
                 },
               ),
               _buildActionItem(
@@ -239,16 +224,14 @@ class MainCategoryScreen extends StatelessWidget {
                 title: "이미지 정보 보기",
                 subtitle: "해상도 및 파일 정보 확인",
                 onTap: () {
-                  // 👈 기존의 _showPreparingMessage 대신 화면 이동 코드로 교체!
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ImageInfoScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImageInfoScreen()));
                 },
               ),
             ],
           ),
           const SizedBox(height: 16),
+
+          // --- PDF 도구 ---
           _buildCategoryTile(
             context,
             title: "PDF 도구 (PDF Tools)",
@@ -260,15 +243,14 @@ class MainCategoryScreen extends StatelessWidget {
                 title: "PDF 도구 모음",
                 subtitle: "PDF 병합, 변환, 뷰어 등",
                 onTap: () {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const PdfToolScreen())
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const PdfToolScreen()));
                 },
               ),
             ],
           ),
           const SizedBox(height: 16),
+
+          // --- 오피스 뷰어 ---
           _buildCategoryTile(
             context,
             title: "오피스 뷰어 (Office & HWP)",
@@ -280,15 +262,14 @@ class MainCategoryScreen extends StatelessWidget {
                 title: "문서 열기",
                 subtitle: "HWP, Word, Excel, PPT 지원",
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DocumentViewerScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentViewerScreen()));
                 },
               ),
             ],
           ),
           const SizedBox(height: 16),
+
+          // --- 🧪 실험실 (새로운 기능 연결됨!) ---
           _buildCategoryTile(
             context,
             title: "AI & 실험실 (Labs)",
@@ -297,14 +278,19 @@ class MainCategoryScreen extends StatelessWidget {
             children: [
               _buildActionItem(
                 context,
-                title: "AI 이미지 생성",
-                subtitle: "텍스트로 이미지 만들기 (준비중)",
-                onTap: () => _showPreparingMessage(context),
+                title: "고해상도 복원 (AI Upscale)", // 👈 신규 기능
+                subtitle: "AI를 이용한 화질 개선 (실험실)",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UpscaleScreen()),
+                  );
+                },
               ),
               _buildActionItem(
                 context,
-                title: "동영상 편집",
-                subtitle: "간단한 컷 편집 (준비중)",
+                title: "AI 이미지 생성",
+                subtitle: "텍스트로 이미지 만들기 (준비중)",
                 onTap: () => _showPreparingMessage(context),
               ),
             ],

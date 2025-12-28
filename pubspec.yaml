@@ -36,28 +36,20 @@ dependencies:
 
   # --- [5. 기타 유틸리티] ---
   url_launcher: ^6.3.0
-  exif: ^3.3.0  # 이미지 메타데이터 추출용
+  exif: ^3.3.0
+
+  # --- [6. AI 기능 관련] ---
+  # ⭐️ tflite_v2를 삭제하고 아래 패키지를 추가합니다.
+  tflite_flutter: ^0.10.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  
-  # [아이콘 생성 패키지]
   flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
-
-  # ⭐️ [여기가 중요합니다!] ⭐️
-  # 이 부분이 있어야 앱 실행 중에 이미지를 불러올 수 있습니다.
   assets:
     - assets/icon/
-
-# --- [아이콘 설정] ---
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/icon/icon.png" 
-  min_sdk_android: 21
-  remove_alpha_ios: true
+    - assets/models/
