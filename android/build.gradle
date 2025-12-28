@@ -1,0 +1,76 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+// 1. [변수 설정]
+subprojects {
+    if (project.name != 'app') {
+        project.ext {
+            flutter = [
+                compileSdkVersion: 34,
+                minSdkVersion: 24,
+                targetSdkVersion: 34,
+                ndkVersion: "25.1.8937393"
+            ]
+        }
+    }
+}
+
+// 2. [안드로이드 설정 강제] SDK 34 & Java 17
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                compileSdk 34
+                defaultConfig {
+                    minSdk 24
+                    targetSdk 34
+                }
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+}
+
+// 3. [오류 해결 핵심] Kotlin 버전을 17로 맞추는 코드
+subprojects {
+    // afterEvaluate 블록 밖에서 실행하여 타이밍 이슈 해결
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+}
+
+// 4. [충돌 방지] AndroidX 버전 고정
+subprojects {
+    project.configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core-ktx:1.13.1'
+            force 'androidx.core:core:1.13.1'
+        }
+    }
+}
+
+// 5. [청소 작업]
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+// ⭐️ [중요] 이 코드를 맨 마지막으로 내렸습니다! ⭐️
+// 모든 설정이 등록된 후에 평가를 진행하도록 순서를 바꿨습니다.
+subprojects {
+    project.evaluationDependsOn(":app")
+}
